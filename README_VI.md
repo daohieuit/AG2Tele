@@ -69,6 +69,10 @@ Xin chân thành cảm ơn tất cả những người đóng góp trước đâ
 - **Tắt bot hoàn toàn:**
   - Chạy tệp `KILL_SERVER.bat` (hoặc `KILL_SERVER_ADMIN.vbs` để chạy quyền Admin).
   - Tệp script mới sẽ quét và tắt sạch vòng lặp bot, safe-startup, server và giải phóng port 8000.
+- **Khởi động nhanh từ Start Menu (Tiện lợi khi Remote):**
+  - Khi chạy `SETUP.bat`, chọn `Y` khi được hỏi để tạo thư mục phím tắt trong Start Menu.
+  - Từ đó, bạn chỉ cần mở Start Menu, gõ tìm **`AG2Tele - Start`** để bật hoặc **`AG2Tele - Stop`** để tắt.
+
 
 **Hoặc chạy debug trực tiếp qua terminal:**
 ```bash

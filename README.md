@@ -71,6 +71,10 @@ Special thanks to all original contributors for laying the foundation of this am
 - **Stop bot completely:**
   - Run `KILL_SERVER.bat` (or `KILL_SERVER_ADMIN.vbs` for Admin rights).
   - This scans and terminates all background bot loops, safe-startup wrappers, server instances, and frees up port 8000.
+- **Start Menu Shortcuts (Recommended for Remote Desktop):**
+  - During `SETUP.bat` setup, select `Y` when prompted to create shortcuts in your Start Menu.
+  - You can then press the `Windows` key and search for **`AG2Tele - Start`** to boot, or **`AG2Tele - Stop`** to terminate the bot.
+
 
 **Or run in foreground for debugging:**
 ```bash

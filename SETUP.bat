@@ -105,4 +105,13 @@ echo       Chạy file: .\START_ALL_SILENT.vbs
 echo.
 echo    3. Truy cập vào Telegram trên điện thoại để bắt đầu sử dụng!
 echo.
+echo ========================================
+set /p CREATE_SHORTCUT="Bạn có muốn tạo lối tắt Start Menu để Bật/Tắt nhanh không? (Y/N): "
+if /i "%CREATE_SHORTCUT%"=="Y" (
+    echo.
+    echo ⏳ Đang tạo lối tắt Start Menu...
+    powershell -ExecutionPolicy Bypass -File ".\scripts\create_start_menu_shortcuts.ps1"
+)
+echo.
 pause
+
