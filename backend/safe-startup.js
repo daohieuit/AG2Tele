@@ -87,7 +87,7 @@ function rollbackToGithubLatest() {
 
     try {
         console.log('📥 Fetching latest origin/main from GitHub...');
-        execSync('git remote set-url origin https://github.com/Nhqvu2005/AntibridgeTelegram.git', { cwd: ROOT, stdio: 'ignore' });
+        execSync('git remote set-url origin https://github.com/daohieuit/AG2Tele.git', { cwd: ROOT, stdio: 'ignore' });
         execSync('git fetch origin main', { cwd: ROOT, stdio: 'inherit' });
 
         const latest = execSync('git rev-parse origin/main', { cwd: ROOT, encoding: 'utf-8' }).trim();

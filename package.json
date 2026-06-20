@@ -1,5 +1,5 @@
 {
-    "name": "antibridge-telegram",
+    "name": "ag2tele",
     "version": "1.0.0",
     "description": "🌉 Antigravity Bridge for Telegram - Remote Control AI Agent via Telegram with CDP Injection, Smart Polling, and Quota Monitor. Fork of AntiBridge-Antigravity-remote by linhbq82.",
     "main": "backend/safe-startup.js",
@@ -21,17 +21,17 @@
     ],
     "repository": {
         "type": "git",
-        "url": "git+https://github.com/Nhqvu2005/AntibridgeTelegram.git"
+        "url": "git+https://github.com/daohieuit/AG2Tele.git"
     },
     "author": {
-        "name": "Nhqvu2005",
-        "url": "https://github.com/Nhqvu2005"
+        "name": "DaoHieuIT",
+        "url": "https://github.com/daohieuit"
     },
     "license": "MIT",
     "bugs": {
-        "url": "https://github.com/Nhqvu2005/AntibridgeTelegram/issues"
+        "url": "https://github.com/daohieuit/AG2Tele/issues"
     },
-    "homepage": "https://github.com/Nhqvu2005/AntibridgeTelegram#readme",
+    "homepage": "https://github.com/daohieuit/AG2Tele#readme",
     "engines": {
         "node": ">=18.0.0",
         "npm": ">=9.0.0"
