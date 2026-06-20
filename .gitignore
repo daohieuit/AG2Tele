@@ -1,0 +1,30 @@
+# Dependencies
+node_modules/
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Quota data (chứa email + thông tin user)
+quota_history.json
+quota_raw_*.json
+
+# Data folder (local only)
+Data/
+
+# OS files
+Thumbs.db
+Desktop.ini
+.DS_Store
+
+# IDE
+.vscode/
+.idea/
+
+# Logs
+*.log
+npm-debug.log*
+.agent/
+AntiHook/
+bot_crash_log.txt

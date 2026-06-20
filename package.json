@@ -1,0 +1,51 @@
+{
+    "name": "antibridge-telegram",
+    "version": "1.0.0",
+    "description": "🌉 Antigravity Bridge for Telegram - Remote Control AI Agent via Telegram with CDP Injection, Smart Polling, and Quota Monitor. Fork of AntiBridge-Antigravity-remote by linhbq82.",
+    "main": "backend/safe-startup.js",
+    "scripts": {
+        "start": "node backend/safe-startup.js",
+        "dev": "node --watch backend/safe-startup.js",
+        "setup": "call SETUP.bat",
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "keywords": [
+        "antigravity",
+        "telegram-bot",
+        "remote-control",
+        "ai-agent",
+        "cdp",
+        "puppeteer",
+        "smart-polling",
+        "quota-monitor"
+    ],
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/Nhqvu2005/AntibridgeTelegram.git"
+    },
+    "author": {
+        "name": "Nhqvu2005",
+        "url": "https://github.com/Nhqvu2005"
+    },
+    "license": "MIT",
+    "bugs": {
+        "url": "https://github.com/Nhqvu2005/AntibridgeTelegram/issues"
+    },
+    "homepage": "https://github.com/Nhqvu2005/AntibridgeTelegram#readme",
+    "engines": {
+        "node": ">=18.0.0",
+        "npm": ">=9.0.0"
+    },
+    "dependencies": {
+        "@xterm/headless": "^6.0.0",
+        "cors": "^2.8.5",
+        "dotenv": "^17.2.4",
+        "express": "^4.18.2",
+        "node-pty": "^1.1.0",
+        "node-telegram-bot-api": "^0.67.0",
+        "puppeteer-core": "^24.0.0",
+        "strip-ansi": "^7.2.0",
+        "uuid": "^9.0.1",
+        "ws": "^8.16.0"
+    }
+}
