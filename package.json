@@ -1,7 +1,7 @@
 {
     "name": "ag2tele",
-    "version": "1.0.0",
-    "description": "🌉 Antigravity Bridge for Telegram - Remote Control AI Agent via Telegram with CDP Injection, Smart Polling, and Quota Monitor. Fork of AntiBridge-Antigravity-remote by linhbq82.",
+    "version": "1.1.0",
+    "description": "🌉 AG2Tele - Remote Control Antigravity AI Agent via Telegram with CDP Injection, Smart Polling, and Quota Monitor. Fork of AntiBridge-Antigravity-remote.",
     "main": "backend/safe-startup.js",
     "scripts": {
         "start": "node backend/safe-startup.js",
