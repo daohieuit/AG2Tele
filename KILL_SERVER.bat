@@ -9,13 +9,14 @@ echo ============================================================
 echo.
 
 echo [1/3] Dang tim va tat tien trinh START_BOT.bat...
-wmic process where "name='cmd.exe' and commandline like '%%START_BOT.bat%%'" delete >nul 2>&1
+taskkill /F /FI "WINDOWTITLE eq AntiBridge Telegram Bot - Safe Startup" >nul 2>&1
+powershell -Command "Get-CimInstance Win32_Process -Filter \"name='cmd.exe' and CommandLine like '%%START_BOT.bat%%'\" | Remove-CimInstance" >nul 2>&1
 
 echo [2/3] Dang tim va tat tien trinh safe-startup.js...
-wmic process where "name='node.exe' and commandline like '%%safe-startup.js%%'" delete >nul 2>&1
+powershell -Command "Get-CimInstance Win32_Process -Filter \"name='node.exe' and CommandLine like '%%safe-startup.js%%'\" | Remove-CimInstance" >nul 2>&1
 
 echo [3/3] Dang tim va tat tien trinh server port 8000...
-wmic process where "name='node.exe' and commandline like '%%telegram-server.js%%'" delete >nul 2>&1
+powershell -Command "Get-CimInstance Win32_Process -Filter \"name='node.exe' and CommandLine like '%%telegram-server.js%%'\" | Remove-CimInstance" >nul 2>&1
 
 REM Fallback check for port 8000
 netstat -ano | findstr :8000 > nul
