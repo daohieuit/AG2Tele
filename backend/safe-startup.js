@@ -1,5 +1,5 @@
 /**
- * Safe-mode startup wrapper for AntiBridge Telegram.
+ * Safe-mode startup wrapper for AG2Tele Telegram.
  *
  * START_BOT.bat runs this file instead of telegram-server.js directly.
  * This catches SyntaxError/import-time crashes, reports them to Telegram,
@@ -198,7 +198,7 @@ function main() {
         writeMarker('child_crash', `exit_code_${code}`, output);
 
         sendTelegram([
-            '💥 AntiBridge crashed during startup/runtime',
+            '💥 AG2Tele crashed during startup/runtime',
             `Exit code: ${code}`,
             `Stable before crash: ${stable ? 'yes' : 'no'}`,
             '',

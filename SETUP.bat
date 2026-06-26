@@ -5,7 +5,7 @@ color 0A
 echo.
 echo ╔════════════════════════════════════════════════════════╗
 echo ║                                                        ║
-echo ║       🌉 AntiBridge v3.7.1 - Auto Setup              ║
+echo ║       🌉 AG2Tele v3.7.1 - Auto Setup               ║
 echo ║       Remote Control for Antigravity AI               ║
 echo ║                                                        ║
 echo ╚════════════════════════════════════════════════════════╝

@@ -4,12 +4,12 @@ color 0C
 
 echo.
 echo ============================================================
-echo           AntiBridge - Tien Hanh Tat He Thong
+echo           AG2Tele - Tien Hanh Tat He Thong
 echo ============================================================
 echo.
 
 echo [1/3] Dang tim va tat tien trinh START_BOT.bat...
-taskkill /F /FI "WINDOWTITLE eq AntiBridge Telegram Bot - Safe Startup" >nul 2>&1
+taskkill /F /FI "WINDOWTITLE eq AG2Tele Telegram Bot - Safe Startup" >nul 2>&1
 powershell -Command "Get-CimInstance Win32_Process -Filter \"name='cmd.exe' and CommandLine like '%%START_BOT.bat%%'\" | Remove-CimInstance" >nul 2>&1
 
 echo [2/3] Dang tim va tat tien trinh safe-startup.js...

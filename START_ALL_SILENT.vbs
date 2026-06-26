@@ -1,4 +1,4 @@
-' AntiBridge v3.7.2 - Silent Master Startup Script
+' AG2Tele v3.7.2 - Silent Master Startup Script
 ' Runs the bot in the background without showing any CMD popup windows.
 ' The bot will automatically launch Antigravity IDE if it is not already running.
 

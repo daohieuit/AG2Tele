@@ -1,5 +1,5 @@
 /**
- * AntiBridge Telegram Server
+ * AG2Tele Telegram Server
  * Server đơn giản - chỉ dùng Telegram Bot thay cho web frontend
  * Vẫn giữ WebSocket server nội bộ cho bridge scripts
  */
@@ -48,7 +48,7 @@ if (!CHAT_ID || CHAT_ID === 'your_chat_id_here') {
 
 console.log(`
 ╔════════════════════════════════════════════════════════════╗
-║          AntiBridge - Telegram Mode                       ║
+║          AG2Tele - Telegram Mode                           ║
 ╠════════════════════════════════════════════════════════════╣
 ║  🤖 Bot Token: ${BOT_TOKEN.substring(0, 10)}...                            ║
 ║  💬 Chat ID:   ${CHAT_ID}                                   ║
@@ -67,7 +67,7 @@ const server = http.createServer((req, res) => {
         return;
     }
     res.writeHead(200, { 'Content-Type': 'text/plain' });
-    res.end('AntiBridge Telegram Mode - Use Telegram Bot to interact');
+    res.end('AG2Tele Telegram Mode - Use Telegram Bot to interact');
 });
 
 const wss = new WebSocket.Server({ server });
@@ -296,7 +296,7 @@ async function startup() {
 
     // Send startup notification to Telegram
     await telegramBot.sendMessage(
-        `🟢 AntiBridge Online!\n\n` +
+        `🟢 AG2Tele Online!\n\n` +
         `🔌 CDP: ${antigravityBridge.isConnected ? '✅ Connected' : '❌ Disconnected'}\n` +
         `📡 WS: Port ${WS_PORT}\n` +
         `🤖 Bot: ✅ Ready\n\n` +
@@ -305,7 +305,7 @@ async function startup() {
 
     console.log(`
 ╔════════════════════════════════════════════════════════════╗
-║  ✅ AntiBridge Telegram Mode - READY!                      ║
+║  ✅ AG2Tele Telegram Mode - READY!                         ║
 ╠════════════════════════════════════════════════════════════╣
 ║  🤖 Telegram Bot:  Online                                  ║
 ║  🔌 CDP:           ${antigravityBridge.isConnected ? 'Connected    ' : 'Disconnected '}                             ║

@@ -1,10 +1,10 @@
 @echo off
 setlocal
 
-title AntiBridge Telegram Bot - Safe Startup
+title AG2Tele Telegram Bot - Safe Startup
 
 echo ========================================
-echo   AntiBridge Telegram Bot - Safe Mode
+echo   AG2Tele Telegram Bot - Safe Mode
 echo ========================================
 echo.
 

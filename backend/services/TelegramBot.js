@@ -79,7 +79,6 @@ class TelegramBotService {
         this._lastMonitoredText = '';
         this._lastMonitoredThinking = '';
         this._monitorCount = 0;
-        this._bgMonitorMsgId = null;
         this._skipInitialPolls = 3;
 
         this._bgMonitorInterval = setInterval(async () => {
@@ -107,7 +106,7 @@ class TelegramBotService {
                 }
 
                 // Nothing to show
-                if (currentText.length < 10 && currentThinking.length < 10 && currentTaskProgress.length < 10) return;
+                if (currentText.length === 0 && currentThinking.length === 0 && currentTaskProgress.length === 0) return;
 
                 // Determine what actually CHANGED
                 const responseChanged = currentText !== this._lastMonitoredText;
@@ -121,17 +120,17 @@ class TelegramBotService {
 
                 // Show what CHANGED — prefer task progress over stale response
                 let displayMsg = '';
-                if (progressChanged && currentTaskProgress.length >= 10) {
+                if (progressChanged && currentTaskProgress.length > 0) {
                     // Task progress changed → ALWAYS show task progress (task is actively running)
                     displayMsg = `📋 Progress:\n${currentTaskProgress}`;
-                } else if (responseChanged && currentText.length >= 10 && !progressChanged) {
+                } else if (responseChanged && currentText.length > 0 && !progressChanged) {
                     // Response changed but progress did NOT → task is done, show final response
                     const formatted = this._formatTablesForTelegram(currentText);
                     displayMsg = `🤖 AI:\n\n${formatted}`;
-                } else if (thinkingChanged && currentThinking.length >= 10) {
+                } else if (thinkingChanged && currentThinking.length > 0) {
                     // Thinking changed → show thinking
                     displayMsg = `💭 Thinking:\n${currentThinking}`;
-                } else if (responseChanged && currentText.length >= 10) {
+                } else if (responseChanged && currentText.length > 0) {
                     // Response changed (with progress also changing) → show response too
                     const formatted = this._formatTablesForTelegram(currentText);
                     displayMsg = `🤖 AI:\n\n${formatted}`;
@@ -140,34 +139,8 @@ class TelegramBotService {
                     return;
                 }
 
-                // Truncate for Telegram 4096 limit
-                if (displayMsg.length > 4000) {
-                    displayMsg = displayMsg.substring(displayMsg.length - 4000);
-                }
-
-                // NO placeholder yet? Create one (for IDE-originated messages)
-                if (!this._bgMonitorMsgId) {
-                    try {
-                        const sent = await this.bot.sendMessage(this.chatId, displayMsg);
-                        this._bgMonitorMsgId = sent.message_id;
-                        console.log(`📨 BG Monitor: Created msg ${sent.message_id}`);
-                    } catch (e) {
-                        console.log(`⚠️ BG Monitor send error: ${e.message?.substring(0, 60)}`);
-                    }
-                    return;
-                }
-
-                // EDIT the existing message (strict 1-message policy)
-                try {
-                    await this.bot.editMessageText(displayMsg, {
-                        chat_id: this.chatId,
-                        message_id: this._bgMonitorMsgId
-                    });
-                } catch (editErr) {
-                    if (!editErr.message?.includes('not modified')) {
-                        console.log(`⚠️ BG Monitor edit error: ${editErr.message?.substring(0, 60)}`);
-                    }
-                }
+                // Send or edit the unified active response message
+                await this._sendOrEditResponse(displayMsg);
 
             } catch (e) {
                 if (this._monitorCount % 30 === 0) {
@@ -254,7 +227,7 @@ class TelegramBotService {
         if (!this._isAuthorized(msg)) return;
 
         await this.sendMessage(
-            `🌉 *AntiBridge Telegram*\n\n` +
+            `🌉 *AG2Tele Telegram*\n\n` +
             `Điều khiển Antigravity AI qua Telegram.\n\n` +
             `📝 Gửi tin nhắn bất kỳ → AI xử lý\n` +
             `✅ /accept - Accept action\n` +
@@ -1489,25 +1462,37 @@ class TelegramBotService {
             let text = (msg.text || msg.caption || '').trim();
             const hasPhoto = msg.photo && msg.photo.length > 0;
 
-            // Xử lý Escape: nếu nhắn // thì sẽ gửi kí tự / vào Terminal hoặc Antigravity
-            if (text.startsWith('//')) {
-                text = text.substring(1);
-            } else if (text.startsWith('/')) {
-                // Nếu chỉ là / thông thường (bot command), nhường cho các handler xử lý
-                return;
-            }
-
-            // Skip if no text AND no photo
-            if (!text && !hasPhoto) return;
-
-            // Handle pending folder name prompt
-            if (this.pendingFolderNamePrompt) {
-                this.pendingFolderNamePrompt = false; // Reset state immediately
-
-                if (text.toLowerCase() === '/cancel') {
+            // 1. Kiểm tra và xử lý trạng thái pending trước
+            // Xử lý hủy trạng thái pending khi nhận lệnh /cancel
+            if (text.toLowerCase() === '/cancel') {
+                if (this.pendingFolderNamePrompt) {
+                    this.pendingFolderNamePrompt = false;
                     await this.sendMessage('Đã hủy tạo thư mục.');
                     return;
                 }
+                if (this.pendingNewFilePrompt) {
+                    this.pendingNewFilePrompt = null;
+                    await this.sendMessage('Đã hủy tạo file.');
+                    return;
+                }
+                if (this.pendingFileEdit) {
+                    this.pendingFileEdit = null;
+                    await this.sendMessage('Đã hủy chỉnh sửa file.');
+                    return;
+                }
+            }
+
+            // Xử lý các lệnh hệ thống khác khi đang treo prompt (tự động xóa prompt)
+            const isCommand = text.startsWith('/') && !text.startsWith('//');
+            if (isCommand && text.toLowerCase() !== '/cancel') {
+                this.pendingFolderNamePrompt = false;
+                this.pendingNewFilePrompt = null;
+                this.pendingFileEdit = null;
+            }
+
+            // Xử lý tạo folder mới
+            if (this.pendingFolderNamePrompt) {
+                this.pendingFolderNamePrompt = false; // Reset state immediately
 
                 // Validate folder name
                 const folderName = text.trim();
@@ -1524,24 +1509,18 @@ class TelegramBotService {
                     } else {
                         fs.mkdirSync(newPath, { recursive: true });
                         await this.sendMessage(`✅ Đã tạo thư mục: **${folderName}**`, { parse_mode: 'Markdown' });
-                        // Re-open the directory view to show the new folder
                         await this._handleOpen(msg, null, parentDir, false);
                     }
                 } catch (e) {
                     await this.sendMessage(`❌ Lỗi tạo thư mục: ${e.message}`);
                 }
-                return; // Stop processing this message further
+                return;
             }
 
-            // Handle pending new file name prompt
+            // Xử lý tạo file mới
             if (this.pendingNewFilePrompt) {
                 const promptState = this.pendingNewFilePrompt;
                 this.pendingNewFilePrompt = null; // Reset state immediately
-
-                if (text.toLowerCase() === '/cancel') {
-                    await this.sendMessage('Đã hủy tạo file.');
-                    return;
-                }
 
                 const fileName = text.trim();
                 if (!fileName || /[<>:"/\\|?*]/.test(fileName)) {
@@ -1565,15 +1544,10 @@ class TelegramBotService {
                 return;
             }
 
-            // Handle pending file edit content
+            // Xử lý chỉnh sửa file
             if (this.pendingFileEdit) {
                 const editState = this.pendingFileEdit;
                 this.pendingFileEdit = null; // Reset state immediately
-
-                if (text.toLowerCase() === '/cancel') {
-                    await this.sendMessage('Đã hủy chỉnh sửa file.');
-                    return;
-                }
 
                 try {
                     fs.writeFileSync(editState.filePath, text, 'utf-8');
@@ -1585,6 +1559,17 @@ class TelegramBotService {
                 }
                 return;
             }
+
+            // Xử lý Escape: nếu nhắn // thì sẽ gửi kí tự / vào Terminal hoặc Antigravity
+            if (text.startsWith('//')) {
+                text = text.substring(1);
+            } else if (text.startsWith('/')) {
+                // Nếu chỉ là / thông thường (bot command), nhường cho các handler xử lý
+                return;
+            }
+
+            // Skip if no text AND no photo
+            if (!text && !hasPhoto) return;
 
             console.log(`📱 Telegram: ${hasPhoto ? '🖼️ Photo' : ''}${text ? ` "${text.substring(0, 50)}..."` : ' (no caption)'}`);
 
@@ -1617,34 +1602,28 @@ class TelegramBotService {
                     let baselineText = '';
                     try { const _r = await this.antigravityBridge.getLastAIResponse(); baselineText = (typeof _r === 'object' ? _r?.text : _r) || ''; } catch (e) { }
 
+                    // Process @file mentions in caption
+                    const processedCaption = await this._processFileMentions(text);
+
                     // Try sending image via CDP
                     let sent = false;
-                    // this._logToFile('INFO', 'ImageHandler', `Processing image: ${localPath} (${(fileSize / 1024).toFixed(1)}KB), caption: "${(text || '').substring(0, 50)}"`);
                     if (this.antigravityBridge.isConnected) {
                         try {
-                            const result = await this.antigravityBridge.injectImageToChat(localPath, text);
-                            // this._logToFile('INFO', 'ImageHandler', `CDP inject result: ${JSON.stringify(result)}`);
+                            const result = await this.antigravityBridge.injectImageToChat(localPath, processedCaption);
                             if (result && result.injected) {
                                 sent = true;
-                                // this._logToFile('INFO', 'ImageHandler', 'Image sent via CDP');
-                            } else {
-                                // this._logToFile('WARN', 'ImageHandler', `CDP inject returned falsy: ${JSON.stringify(result)}`);
                             }
-                        } catch (e) {
-                            // this._logToFile('ERROR', 'ImageHandler', `CDP image inject exception`, e);
-                        }
+                        } catch (e) {}
                     }
 
                     // Fallback: PowerShell clipboard paste
                     if (!sent) {
                         console.log('📋 Falling back to PowerShell image clipboard...');
                         try {
-                            await this._sendImageViaClipboard(localPath, text);
+                            await this._sendImageViaClipboard(localPath, processedCaption);
                             sent = true;
                             console.log('✅ Image sent via PowerShell clipboard');
-                        } catch (e) {
-                            // this._logToFile('ERROR', 'ImageHandler', `Clipboard fallback failed`, e);
-                        }
+                        } catch (e) {}
                     }
 
                     // Cleanup temp file
@@ -1685,6 +1664,9 @@ class TelegramBotService {
                 baselineText = (typeof _r === 'object' ? _r?.text : _r) || '';
             } catch (e) { /* ignore */ }
 
+            // Process file mentions in prompt text
+            const processedText = await this._processFileMentions(text);
+
             try {
                 // ===== TRY 1: CDP injection =====
                 let sent = false;
@@ -1699,10 +1681,9 @@ class TelegramBotService {
                             this._lastMonitoredProgress = (baseline?.taskProgress || '').trim();
                         } catch (e) { /* ignore */ }
 
-                        this._bgMonitorMsgId = null; // New turn → new message when content changes
                         this._skipInitialPolls = 0;
 
-                        const result = await this.antigravityBridge.injectTextToChat(text);
+                        const result = await this.antigravityBridge.injectTextToChat(processedText);
                         if (result && result.success) {
                             sent = true;
                             console.log('✅ Sent via CDP');
@@ -1717,7 +1698,7 @@ class TelegramBotService {
                 if (!sent) {
                     console.log('📋 Falling back to PowerShell clipboard (⚠️ will steal window focus)...');
                     try {
-                        await this._sendViaClipboard(text);
+                        await this._sendViaClipboard(processedText);
                         sent = true;
                         console.log('✅ Sent via PowerShell clipboard');
                     } catch (e) {
@@ -1726,8 +1707,9 @@ class TelegramBotService {
                 }
 
                 if (sent) {
-                    // BG Monitor handles response delivery — no need for extra messages
-                    console.log('✅ Message injected. BG Monitor will detect response.');
+                    // Start response polling to guarantee delivery even if WS is down
+                    this._pollForResponse(baselineText);
+                    console.log('✅ Message injected. Polling started.');
                 } else {
                     await this.sendMessage('❌ Không thể gửi tin nhắn. Kiểm tra Antigravity đang chạy?');
                 }
@@ -1745,11 +1727,11 @@ class TelegramBotService {
      * Total max: ~15 min wait time
      */
     async _pollForResponse(baselineText) {
-        const FAST_INTERVAL = 1500;   // 1.5s (was 3s)
-        const SLOW_INTERVAL = 5000;   // 5s (was 10s)
+        const FAST_INTERVAL = 1500;   // 1.5s
+        const SLOW_INTERVAL = 5000;   // 5s
         const FAST_PHASE_MS = 120000; // 2 min fast polling
         const MAX_TOTAL_MS = 900000;  // 15 min total
-        const STABLE_COUNT = 1;       // 1 consecutive same-text = complete (was 2)
+        const STABLE_COUNT = 1;       // 1 consecutive same-text = complete
 
         let pollCount = 0;
         let lastPollText = '';
@@ -1809,9 +1791,12 @@ class TelegramBotService {
                         this.lastSentText = currentText;
                         this._lastMonitoredText = currentText;
 
-                        // Don't send here — BG Monitor handles editing the placeholder
-                        // Just update lastSentText so BG Monitor's next cycle picks it up
+                        // Save to history
                         this.messageLogger?.saveHistory?.('assistant', currentText, null);
+
+                        // Send directly via unified response mechanism
+                        const formatted = this._formatTablesForTelegram(currentText);
+                        await this._sendOrEditResponse(`🤖 AI:\n\n${formatted}`);
                         return;
                     }
                 } else {
@@ -1833,6 +1818,68 @@ class TelegramBotService {
 
         // Start first poll
         setTimeout(doPoll, FAST_INTERVAL);
+    }
+
+    /**
+     * Parse @file.ext references in message text and append their contents.
+     */
+    async _processFileMentions(text) {
+        if (!text) return text;
+        const projectRoot = await this._getProjectRoot();
+        if (!projectRoot) return text;
+
+        const mentionRegex = /@([^\s]+)/g;
+        let match;
+        let modifiedText = text;
+        const attachments = [];
+        const processedPaths = new Set();
+
+        // Reset regex index
+        mentionRegex.lastIndex = 0;
+
+        while ((match = mentionRegex.exec(text)) !== null) {
+            const mentionStr = match[0];
+            const filePathPart = match[1];
+
+            // Clean path (remove trailing punctuation commonly typed by users like . , ; : ? !)
+            const cleanPath = filePathPart.replace(/[.,;:?!]$/, '');
+
+            // Try resolving relative to project root first, then absolute
+            let fullPath = path.resolve(projectRoot, cleanPath);
+            if (!fs.existsSync(fullPath)) {
+                if (fs.existsSync(cleanPath)) {
+                    fullPath = path.resolve(cleanPath);
+                } else {
+                    continue;
+                }
+            }
+
+            // Avoid reading the same file twice
+            if (processedPaths.has(fullPath)) continue;
+            processedPaths.add(fullPath);
+
+            try {
+                const stat = fs.statSync(fullPath);
+                if (!stat.isFile()) continue;
+
+                // Max file size: 50 KB to avoid token overflow
+                if (stat.size > 50 * 1024) {
+                    attachments.push(`\n\n[File: ${cleanPath} - Bỏ qua vì kích thước lớn hơn 50KB]`);
+                    continue;
+                }
+
+                const content = fs.readFileSync(fullPath, 'utf-8');
+                attachments.push(`\n\n📄 **File: ${cleanPath}**\n\`\`\`\n${content}\n\`\`\``);
+            } catch (e) {
+                console.error(`Error reading mentioned file ${cleanPath}:`, e.message);
+            }
+        }
+
+        if (attachments.length > 0) {
+            modifiedText = modifiedText + attachments.join('');
+        }
+
+        return modifiedText;
     }
 
     /**

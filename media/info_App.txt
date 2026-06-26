@@ -1,10 +1,5 @@
-Tên app: AntiBridge
+Tên app: AG2Tele
 Tagline: A bridge between your phone and Antigravity.
-Tác Giả: Linh Bui
-E-Mail: linhbq82@gmail.com
-facebook: https://www.facebook.com/linhbuiart.io.vn/
-https://github.com/linhbq82
-
-
-QR Tặng Quà 1  [tang_banh_bao.jpg]
-donate + QR 2 : https://buymeacoffee.com/linhbq82 -QR DONATE [buy_me_a_coffee.png]
+Tác Giả: DaoHieuIT (Kế thừa từ Linh Bui)
+Github: https://github.com/daohieuit/AG2Tele
+Dự án gốc: https://github.com/linhbq82/AntiBridge-Antigravity-remote

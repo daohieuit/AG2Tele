@@ -1,4 +1,4 @@
-# 🌉 AntiBridge - Antigravity Telegram Remote
+# 🌉 AG2Tele - Antigravity Telegram Remote
 
 > Điều khiển Antigravity IDE từ xa qua Telegram — Chat AI, giám sát quota, và nhiều hơn thế.
 
